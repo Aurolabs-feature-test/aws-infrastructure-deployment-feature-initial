@@ -1,10 +1,10 @@
 # Reference existing S3 buckets
 data "aws_s3_bucket" "rawdata" {
-  bucket = "salesforce-objects-rawzone"
+  bucket = "salesforce-objects-rawzone-01"
 }
 
 data "aws_s3_bucket" "curated" {
-  bucket = "curated-bc"
+  bucket = "curated-bc-01"
 }
 
 # Upload ETL script to S3
@@ -22,7 +22,7 @@ resource "random_id" "suffix" {
 
 # IAM Role for Glue Job
 resource "aws_iam_role" "glue_role" {
-  name = "glue-etl-role-${random_id.suffix.hex}"
+  name                  = "glue-etl-role-${random_id.suffix.hex}"
   force_detach_policies = true
 
   assume_role_policy = jsonencode({
@@ -72,11 +72,11 @@ resource "aws_iam_role_policy" "glue_s3_policy" {
 
 # Glue Job
 resource "aws_glue_job" "etl_pipeline" {
-  name         = "etl-pipeline-job-${random_id.suffix.hex}"
-  role_arn     = aws_iam_role.glue_role.arn
-  glue_version = "5.0"
+  name              = "etl-pipeline-job-${random_id.suffix.hex}"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "5.0"
   number_of_workers = 2
-  worker_type = "G.1X"
+  worker_type       = "G.1X"
 
   command {
     script_location = "s3://${data.aws_s3_bucket.rawdata.bucket}/scripts/etl_pipeline.py"
